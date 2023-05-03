@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.postgres.name }}
+  labels:
+    app: {{ .Values.postgres.name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.postgres.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.postgres.name }}
+    spec:
+      containers:
+      - name: {{ .Values.postgres.name }}
+        image: {{ .Values.postgres.container.image }}
+        env:
+        - name: {{ .Values.postgres.container.env.env1 }}
+          valueFrom:
+            configMapKeyRef:
+              key: {{ .Values.postgres.container.env.env1 }}
+              name: postgres-config
+        - name: {{ .Values.postgres.container.env.env2 }}
+          valueFrom:
+            configMapKeyRef:
+              key: {{ .Values.postgres.container.env.env2 }}
+              name: postgres-config
+        - name: {{ .Values.postgres.container.env.env3 }}
+          valueFrom:
+            configMapKeyRef:
+              key: {{ .Values.postgres.container.env.env3 }}
+              name: postgres-config
+        ports:
+          - containerPort: 5432
+            name: {{ .Values.postgres.name }}
+        volumeMounts:
+          - name: postgres-storage
+            mountPath: /var/lib/postgresql/db-data
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
